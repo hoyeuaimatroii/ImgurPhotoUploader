@@ -107,12 +107,16 @@ def upload_to_imgur(file, filename):
             else:
                 return jsonify({"error": f"Failed to upload file to Imgur after {MAX_RETRIES} attempts"}), 500
 
-def upload_to_imgbb(image, filename):
+def upload_to_imgbb(file, filename):
     if not IMGBB_API_KEY:
         logger.error("IMGBB_API_KEY is not set")
         return jsonify({"error": "Server configuration error"}), 500
 
-    files = {"image": (filename, image, image.content_type)}
+    # Check if the file is a video
+    if file.content_type.startswith('video/'):
+        return jsonify({"error": "ImgBB does not support video uploads"}), 400
+
+    files = {"image": (filename, file, file.content_type)}
     data = {"key": IMGBB_API_KEY}
 
     for attempt in range(MAX_RETRIES):
@@ -121,8 +125,7 @@ def upload_to_imgbb(image, filename):
             response.raise_for_status()
             imgbb_data = response.json()
             imgbb_link = imgbb_data["data"]["url"]
-            imgbb_image_url = imgbb_data["data"]["url"]
-            return jsonify({"success": True, "link": imgbb_link, "image_url": imgbb_image_url, "service": "imgbb"})
+            return jsonify({"success": True, "link": imgbb_link, "service": "imgbb"})
         except requests.exceptions.RequestException as e:
             logger.error(f"ImgBB upload attempt {attempt + 1} failed: {str(e)}")
             if response:

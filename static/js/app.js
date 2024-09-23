@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (xhr.status === 200) {
                     resolve(JSON.parse(xhr.responseText));
                 } else {
-                    reject(new Error(xhr.statusText));
+                    reject(new Error(xhr.responseText));
                 }
             };
             xhr.onerror = () => reject(new Error('Network error occurred'));
