@@ -46,8 +46,9 @@ class ProgressFileStorage(FileStorage):
         return 0
 
 def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    allowed = '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    logger.info(f"Checking if file is allowed: {filename}, Result: {allowed}")
+    return allowed
 
 @app.route("/")
 def index():
@@ -63,7 +64,10 @@ def upload_image():
         if file.filename == "":
             return jsonify({"error": "No file selected"}), 400
 
+        logger.info(f"Attempting to upload file: {file.filename}, Content-Type: {file.content_type}")
+
         if not allowed_file(file.filename):
+            logger.warning(f"File type not allowed: {file.filename}")
             return jsonify({"error": "File type not allowed"}), 400
 
         service = request.form.get("service", "imgur")

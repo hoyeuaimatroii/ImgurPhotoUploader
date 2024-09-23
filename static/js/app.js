@@ -49,6 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('file', file);
             formData.append('service', service);
 
+            console.log(`Uploading file: ${file.name}, Type: ${file.type}, Size: ${file.size} bytes, Service: ${service}`);
+
             xhr.open('POST', '/upload', true);
             xhr.upload.onprogress = (event) => {
                 if (event.lengthComputable) {
@@ -58,12 +60,17 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             xhr.onload = () => {
                 if (xhr.status === 200) {
+                    console.log(`Upload successful. Response: ${xhr.responseText}`);
                     resolve(JSON.parse(xhr.responseText));
                 } else {
+                    console.error(`Upload failed. Status: ${xhr.status}, Response: ${xhr.responseText}`);
                     reject(new Error(xhr.responseText));
                 }
             };
-            xhr.onerror = () => reject(new Error('Network error occurred'));
+            xhr.onerror = () => {
+                console.error('Network error occurred during upload');
+                reject(new Error('Network error occurred'));
+            }
             xhr.send(formData);
         });
     }
