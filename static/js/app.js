@@ -49,13 +49,19 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('file', file);
             formData.append('service', service);
 
-            console.log(`Uploading file: ${file.name}, Type: ${file.type}, Size: ${file.size} bytes, Service: ${service}`);
+            console.log(`Uploading file: ${file.name}`);
+            console.log(`File details:`);
+            console.log(`- Type: ${file.type}`);
+            console.log(`- Size: ${file.size} bytes`);
+            console.log(`- Last Modified: ${new Date(file.lastModified).toLocaleString()}`);
+            console.log(`Selected Service: ${service}`);
 
             xhr.open('POST', '/upload', true);
             xhr.upload.onprogress = (event) => {
                 if (event.lengthComputable) {
                     const percentComplete = (event.loaded / event.total) * 100;
                     updateProgressBar(percentComplete);
+                    console.log(`Upload progress: ${percentComplete.toFixed(2)}%`);
                 }
             };
             xhr.onload = () => {
