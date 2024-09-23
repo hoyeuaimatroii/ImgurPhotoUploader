@@ -17,6 +17,7 @@ IMGUR_CLIENT_ID = os.environ.get("IMGUR_CLIENT_ID")
 IMGUR_API_URL = "https://api.imgur.com/3/image"
 IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY")
 IMGBB_API_URL = "https://api.imgbb.com/1/upload"
+CATBOX_API_URL = "https://catbox.moe/user/api.php"
 
 # Retry configuration
 MAX_RETRIES = 3
@@ -80,6 +81,8 @@ def upload_image():
                 return upload_to_imgur(file, filename)
             elif service == "imgbb":
                 return upload_to_imgbb(file, filename)
+            elif service == "catbox":
+                return upload_to_catbox(file, filename)
             else:
                 return jsonify({"error": "Invalid service selected"}), 400
         else:
@@ -139,6 +142,25 @@ def upload_to_imgbb(file, filename):
                 time.sleep(RETRY_DELAY * (2 ** attempt))  # Exponential backoff
             else:
                 return jsonify({"error": f"Failed to upload image to ImgBB after {MAX_RETRIES} attempts"}), 500
+
+def upload_to_catbox(file, filename):
+    files = {"fileToUpload": (filename, file, file.content_type)}
+    data = {"reqtype": "fileupload", "userhash": ""}  # Add user hash if needed
+
+    for attempt in range(MAX_RETRIES):
+        try:
+            response = requests.post(CATBOX_API_URL, files=files, data=data)
+            response.raise_for_status()
+            catbox_link = response.text.strip()
+            return jsonify({"success": True, "link": catbox_link, "service": "catbox"})
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Catbox upload attempt {attempt + 1} failed: {str(e)}")
+            if response:
+                logger.error(f"Response content: {response.content}")
+            if attempt < MAX_RETRIES - 1:
+                time.sleep(RETRY_DELAY * (2 ** attempt))  # Exponential backoff
+            else:
+                return jsonify({"error": f"Failed to upload file to Catbox after {MAX_RETRIES} attempts"}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
