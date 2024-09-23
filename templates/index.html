@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Imgur Image Uploader</title>
+    <title>Image Uploader</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center">
     <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 class="text-2xl font-bold mb-6 text-center">Imgur Image Uploader</h1>
+        <h1 class="text-2xl font-bold mb-6 text-center">Image Uploader</h1>
         <form id="uploadForm" class="space-y-4">
             <div class="flex items-center justify-center w-full">
                 <label for="imageInput" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
@@ -21,13 +21,23 @@
                     <input id="imageInput" type="file" class="hidden" accept="image/*" />
                 </label>
             </div>
+            <div class="flex justify-center space-x-4">
+                <label class="inline-flex items-center">
+                    <input type="radio" class="form-radio" name="uploadService" value="imgur" checked>
+                    <span class="ml-2">Imgur</span>
+                </label>
+                <label class="inline-flex items-center">
+                    <input type="radio" class="form-radio" name="uploadService" value="imgbb">
+                    <span class="ml-2">ImgBB</span>
+                </label>
+            </div>
             <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                 Upload Image
             </button>
         </form>
         <div id="result" class="mt-6 text-center hidden">
-            <h2 class="text-lg font-semibold mb-2">Imgur Link:</h2>
-            <a id="imgurLink" href="#" target="_blank" class="text-blue-500 hover:underline break-all"></a>
+            <h2 class="text-lg font-semibold mb-2">Image Link:</h2>
+            <a id="imageLink" href="#" target="_blank" class="text-blue-500 hover:underline break-all"></a>
         </div>
         <div id="error" class="mt-6 text-center text-red-500 hidden"></div>
     </div>

@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadForm = document.getElementById('uploadForm');
     const imageInput = document.getElementById('imageInput');
     const resultDiv = document.getElementById('result');
-    const imgurLinkElement = document.getElementById('imgurLink');
+    const imageLinkElement = document.getElementById('imageLink');
     const errorDiv = document.getElementById('error');
     const dropZone = document.querySelector('label[for="imageInput"]');
 
@@ -15,14 +15,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        await uploadFile(file);
+        const selectedService = document.querySelector('input[name="uploadService"]:checked').value;
+        await uploadFile(file, selectedService);
     });
 
-    function showResult(link) {
+    function showResult(link, service) {
         resultDiv.classList.remove('hidden');
         errorDiv.classList.add('hidden');
-        imgurLinkElement.href = link;
-        imgurLinkElement.textContent = link;
+        imageLinkElement.href = link;
+        imageLinkElement.textContent = `${service.charAt(0).toUpperCase() + service.slice(1)} Link: ${link}`;
     }
 
     function showError(message) {
@@ -31,9 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
         errorDiv.textContent = message;
     }
 
-    async function uploadFile(file) {
+    async function uploadFile(file, service) {
         const formData = new FormData();
         formData.append('image', file);
+        formData.append('service', service);
 
         try {
             const response = await fetch('/upload', {
@@ -44,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (response.ok) {
-                showResult(data.link);
+                showResult(data.link, data.service);
             } else {
                 showError(data.error || 'An error occurred while uploading the image.');
             }
