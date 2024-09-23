@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const displayedImage = document.getElementById('displayedImage');
     const errorDiv = document.getElementById('error');
     const dropZone = document.querySelector('label[for="imageInput"]');
+    const imagePreviewDiv = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
 
     uploadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -65,10 +67,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const file = files[0];
             if (file.type.startsWith('image/')) {
                 imageInput.files = files;
+                previewImage(file);
             } else {
                 showError('Please select an image file.');
             }
         }
+    }
+
+    function previewImage(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            imagePreviewDiv.classList.remove('hidden');
+        }
+        reader.readAsDataURL(file);
     }
 
     // File input change event
