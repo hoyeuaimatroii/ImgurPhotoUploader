@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 previewVideo.classList.remove('hidden');
                 previewImg.classList.add('hidden');
                 previewAudio.classList.add('hidden');
-            } else if (file.type === 'audio/mp3') {
+            } else if (file.type === 'audio/mpeg' || file.type === 'audio/mp3') {
                 previewAudio.src = e.target.result;
                 previewAudio.classList.remove('hidden');
                 previewImg.classList.add('hidden');
