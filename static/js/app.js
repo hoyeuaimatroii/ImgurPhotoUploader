@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const dropZone = document.querySelector('label[for="imageInput"]');
     const imagePreviewDiv = document.getElementById('imagePreview');
     const previewImg = document.getElementById('previewImg');
+    const progressBarContainer = document.getElementById('progressBarContainer');
+    const progressBar = document.getElementById('uploadProgress');
 
     uploadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -18,7 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const selectedService = document.querySelector('input[name="uploadService"]:checked').value;
-        await uploadFile(file, selectedService);
+        try {
+            const result = await uploadFile(file, selectedService);
+            showResult(result.link, result.image_url, result.service);
+        } catch (error) {
+            showError(error.message || 'An error occurred while uploading the image.');
+        }
     });
 
     function showResult(link, imageUrl, service) {
@@ -34,26 +41,40 @@ document.addEventListener('DOMContentLoaded', () => {
         errorDiv.textContent = message;
     }
 
-    async function uploadFile(file, service) {
-        const formData = new FormData();
-        formData.append('image', file);
-        formData.append('service', service);
+    function uploadFile(file, service) {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('service', service);
 
-        try {
-            const response = await fetch('/upload', {
-                method: 'POST',
-                body: formData
-            });
+            xhr.open('POST', '/upload', true);
+            xhr.upload.onprogress = (event) => {
+                if (event.lengthComputable) {
+                    const percentComplete = (event.loaded / event.total) * 100;
+                    updateProgressBar(percentComplete);
+                }
+            };
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    resolve(JSON.parse(xhr.responseText));
+                } else {
+                    reject(new Error(xhr.statusText));
+                }
+            };
+            xhr.onerror = () => reject(new Error('Network error occurred'));
+            xhr.send(formData);
+        });
+    }
 
-            const data = await response.json();
-
-            if (response.ok) {
-                showResult(data.link, data.image_url, data.service);
-            } else {
-                showError(data.error || 'An error occurred while uploading the image.');
-            }
-        } catch (error) {
-            showError('An error occurred while uploading the image.');
+    function updateProgressBar(percentage) {
+        progressBarContainer.classList.remove('hidden');
+        progressBar.style.width = `${percentage}%`;
+        progressBar.textContent = `${percentage.toFixed(2)}%`;
+        if (percentage === 100) {
+            setTimeout(() => {
+                progressBarContainer.classList.add('hidden');
+            }, 1000);
         }
     }
 

@@ -4,6 +4,7 @@ import logging
 import time
 from flask import Flask, render_template, request, jsonify
 from werkzeug.utils import secure_filename
+from werkzeug.datastructures import FileStorage
 
 app = Flask(__name__)
 
@@ -21,6 +22,23 @@ IMGBB_API_URL = "https://api.imgbb.com/1/upload"
 MAX_RETRIES = 3
 RETRY_DELAY = 1  # Initial delay in seconds
 
+class ProgressFileStorage(FileStorage):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.bytes_read = 0
+        self.total_bytes = self.content_length
+
+    def read(self, size=-1):
+        chunk = super().read(size)
+        self.bytes_read += len(chunk)
+        return chunk
+
+    @property
+    def progress(self):
+        if self.total_bytes:
+            return (self.bytes_read / self.total_bytes) * 100
+        return 0
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -30,7 +48,7 @@ def upload_image():
     if "image" not in request.files:
         return jsonify({"error": "No image file provided"}), 400
 
-    image = request.files["image"]
+    image = ProgressFileStorage(request.files["image"])
     if image.filename == "":
         return jsonify({"error": "No image selected"}), 400
 
