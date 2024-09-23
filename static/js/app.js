@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const filePreviewDiv = document.getElementById('filePreview');
     const previewImg = document.getElementById('previewImg');
     const previewVideo = document.getElementById('previewVideo');
+    const previewAudio = document.getElementById('previewAudio');
     const progressBarContainer = document.getElementById('progressBarContainer');
     const progressBar = document.getElementById('uploadProgress');
 
@@ -107,10 +108,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 previewImg.src = e.target.result;
                 previewImg.classList.remove('hidden');
                 previewVideo.classList.add('hidden');
+                previewAudio.classList.add('hidden');
             } else if (file.type.startsWith('video/')) {
                 previewVideo.src = e.target.result;
                 previewVideo.classList.remove('hidden');
                 previewImg.classList.add('hidden');
+                previewAudio.classList.add('hidden');
+            } else if (file.type === 'audio/mp3') {
+                previewAudio.src = e.target.result;
+                previewAudio.classList.remove('hidden');
+                previewImg.classList.add('hidden');
+                previewVideo.classList.add('hidden');
             }
             filePreviewDiv.classList.remove('hidden');
         }

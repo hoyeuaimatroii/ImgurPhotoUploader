@@ -24,7 +24,7 @@ MAX_RETRIES = 3
 RETRY_DELAY = 1  # Initial delay in seconds
 
 # Allowed file types
-ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'mp4', 'webm'}
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'mp4', 'webm', 'mp3'}
 
 class ProgressFileStorage(FileStorage):
     def __init__(self, *args, **kwargs):
@@ -120,9 +120,9 @@ def upload_to_imgbb(file, filename):
         logger.error("IMGBB_API_KEY is not set")
         return jsonify({"error": "Server configuration error"}), 500
 
-    # Check if the file is a video
-    if file.content_type.startswith('video/'):
-        return jsonify({"error": "ImgBB does not support video uploads"}), 400
+    # Check if the file is a video or audio
+    if file.content_type.startswith('video/') or file.content_type.startswith('audio/'):
+        return jsonify({"error": "ImgBB does not support video or audio uploads"}), 400
 
     files = {"image": (filename, file, file.content_type)}
     data = {"key": IMGBB_API_KEY}
