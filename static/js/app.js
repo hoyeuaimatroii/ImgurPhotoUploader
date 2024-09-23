@@ -5,6 +5,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const imgurLinkElement = document.getElementById('imgurLink');
     const errorDiv = document.getElementById('error');
     const dropZone = document.querySelector('label[for="imageInput"]');
+    const previewContainer = document.createElement('div');
+    previewContainer.id = 'imagePreview';
+    previewContainer.classList.add('mt-4', 'hidden');
+    dropZone.parentNode.insertBefore(previewContainer, dropZone.nextSibling);
 
     uploadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -70,9 +74,11 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.onload = (event) => {
             const img = document.createElement('img');
             img.src = event.target.result;
-            img.classList.add('w-full', 'h-64', 'object-cover', 'rounded-lg');
-            dropZone.innerHTML = '';
-            dropZone.appendChild(img);
+            img.classList.add('w-full', 'h-64', 'object-contain', 'rounded-lg');
+            previewContainer.innerHTML = '';
+            previewContainer.appendChild(img);
+            previewContainer.classList.remove('hidden');
+            dropZone.querySelector('div').classList.add('hidden');
         };
         reader.readAsDataURL(file);
     }
