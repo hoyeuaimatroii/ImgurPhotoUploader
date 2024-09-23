@@ -3,27 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Uploader</title>
+    <title>File Uploader</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center">
     <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 class="text-2xl font-bold mb-6 text-center">Image Uploader</h1>
+        <h1 class="text-2xl font-bold mb-6 text-center">File Uploader</h1>
         <form id="uploadForm" class="space-y-4">
             <div class="flex items-center justify-center w-full">
-                <label for="imageInput" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                <label for="fileInput" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
                     <div class="flex flex-col items-center justify-center pt-5 pb-6">
                         <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                         <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                        <p class="text-xs text-gray-500">PNG, JPG or GIF (MAX. 800x400px)</p>
+                        <p class="text-xs text-gray-500">JPEG, PNG, GIF, MP4, or WEBM</p>
                     </div>
-                    <input id="imageInput" type="file" class="hidden" accept="image/*" />
+                    <input id="fileInput" type="file" class="hidden" accept="image/jpeg,image/png,image/gif,video/mp4,video/webm" />
                 </label>
             </div>
-            <div id="imagePreview" class="mt-4 hidden">
-                <h2 class="text-lg font-semibold mb-2">Image Preview:</h2>
-                <img id="previewImg" src="" alt="Image Preview" class="max-w-full h-auto mx-auto">
+            <div id="filePreview" class="mt-4 hidden">
+                <h2 class="text-lg font-semibold mb-2">File Preview:</h2>
+                <img id="previewImg" src="" alt="Image Preview" class="max-w-full h-auto mx-auto hidden">
+                <video id="previewVideo" src="" controls class="max-w-full h-auto mx-auto hidden"></video>
             </div>
             <div class="flex justify-center space-x-4">
                 <label class="inline-flex items-center">
@@ -39,12 +40,12 @@
                 <div id="uploadProgress" class="bg-blue-600 h-2.5 rounded-full text-center text-xs font-medium text-blue-100 leading-none" style="width: 0%">0%</div>
             </div>
             <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                Upload Image
+                Upload File
             </button>
         </form>
         <div id="result" class="mt-6 text-center hidden">
-            <h2 class="text-lg font-semibold mb-2">Image Link:</h2>
-            <a id="imageLink" href="#" target="_blank" class="text-blue-500 hover:underline break-all"></a>
+            <h2 class="text-lg font-semibold mb-2">File Link:</h2>
+            <a id="fileLink" href="#" target="_blank" class="text-blue-500 hover:underline break-all"></a>
         </div>
         <div id="error" class="mt-6 text-center text-red-500 hidden"></div>
     </div>

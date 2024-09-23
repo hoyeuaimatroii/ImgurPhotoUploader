@@ -1,38 +1,39 @@
 document.addEventListener('DOMContentLoaded', () => {
     const uploadForm = document.getElementById('uploadForm');
-    const imageInput = document.getElementById('imageInput');
+    const fileInput = document.getElementById('fileInput');
     const resultDiv = document.getElementById('result');
-    const imageLinkElement = document.getElementById('imageLink');
+    const fileLinkElement = document.getElementById('fileLink');
     const errorDiv = document.getElementById('error');
-    const dropZone = document.querySelector('label[for="imageInput"]');
-    const imagePreviewDiv = document.getElementById('imagePreview');
+    const dropZone = document.querySelector('label[for="fileInput"]');
+    const filePreviewDiv = document.getElementById('filePreview');
     const previewImg = document.getElementById('previewImg');
+    const previewVideo = document.getElementById('previewVideo');
     const progressBarContainer = document.getElementById('progressBarContainer');
     const progressBar = document.getElementById('uploadProgress');
 
     uploadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        const file = imageInput.files[0];
+        const file = fileInput.files[0];
         if (!file) {
-            showError('Please select an image file.');
+            showError('Please select a file.');
             return;
         }
 
         const selectedService = document.querySelector('input[name="uploadService"]:checked').value;
         try {
             const result = await uploadFile(file, selectedService);
-            showResult(result.link, result.image_url, result.service);
+            showResult(result.link, result.service);
         } catch (error) {
-            showError(error.message || 'An error occurred while uploading the image.');
+            showError(error.message || 'An error occurred while uploading the file.');
         }
     });
 
-    function showResult(link, imageUrl, service) {
+    function showResult(link, service) {
         resultDiv.classList.remove('hidden');
         errorDiv.classList.add('hidden');
-        imageLinkElement.href = link;
-        imageLinkElement.textContent = `${service.charAt(0).toUpperCase() + service.slice(1)} Link: ${link}`;
+        fileLinkElement.href = link;
+        fileLinkElement.textContent = `${service.charAt(0).toUpperCase() + service.slice(1)} Link: ${link}`;
     }
 
     function showError(message) {
@@ -45,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             const formData = new FormData();
-            formData.append('image', file);
+            formData.append('file', file);
             formData.append('service', service);
 
             xhr.open('POST', '/upload', true);
@@ -81,26 +82,30 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleFiles(files) {
         if (files.length > 0) {
             const file = files[0];
-            if (file.type.startsWith('image/')) {
-                imageInput.files = files;
-                previewImage(file);
-            } else {
-                showError('Please select an image file.');
-            }
+            fileInput.files = files;
+            previewFile(file);
         }
     }
 
-    function previewImage(file) {
+    function previewFile(file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            previewImg.src = e.target.result;
-            imagePreviewDiv.classList.remove('hidden');
+            if (file.type.startsWith('image/')) {
+                previewImg.src = e.target.result;
+                previewImg.classList.remove('hidden');
+                previewVideo.classList.add('hidden');
+            } else if (file.type.startsWith('video/')) {
+                previewVideo.src = e.target.result;
+                previewVideo.classList.remove('hidden');
+                previewImg.classList.add('hidden');
+            }
+            filePreviewDiv.classList.remove('hidden');
         }
         reader.readAsDataURL(file);
     }
 
     // File input change event
-    imageInput.addEventListener('change', (e) => {
+    fileInput.addEventListener('change', (e) => {
         handleFiles(e.target.files);
     });
 

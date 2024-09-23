@@ -22,6 +22,9 @@ IMGBB_API_URL = "https://api.imgbb.com/1/upload"
 MAX_RETRIES = 3
 RETRY_DELAY = 1  # Initial delay in seconds
 
+# Allowed file types
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'mp4', 'webm'}
+
 class ProgressFileStorage(FileStorage):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -42,6 +45,10 @@ class ProgressFileStorage(FileStorage):
             return (self.bytes_read / self.total_bytes) * 100
         return 0
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -49,37 +56,40 @@ def index():
 @app.route("/upload", methods=["POST"])
 def upload_image():
     try:
-        if "image" not in request.files:
-            return jsonify({"error": "No image file provided"}), 400
+        if "file" not in request.files:
+            return jsonify({"error": "No file provided"}), 400
 
-        image = ProgressFileStorage(request.files["image"])
-        if image.filename == "":
-            return jsonify({"error": "No image selected"}), 400
+        file = ProgressFileStorage(request.files["file"])
+        if file.filename == "":
+            return jsonify({"error": "No file selected"}), 400
+
+        if not allowed_file(file.filename):
+            return jsonify({"error": "File type not allowed"}), 400
 
         service = request.form.get("service", "imgur")
 
-        if image:
-            filename = secure_filename(image.filename)
+        if file:
+            filename = secure_filename(file.filename)
             
             if service == "imgur":
-                return upload_to_imgur(image, filename)
+                return upload_to_imgur(file, filename)
             elif service == "imgbb":
-                return upload_to_imgbb(image, filename)
+                return upload_to_imgbb(file, filename)
             else:
                 return jsonify({"error": "Invalid service selected"}), 400
         else:
-            return jsonify({"error": "Invalid image file"}), 400
+            return jsonify({"error": "Invalid file"}), 400
     except Exception as e:
         logger.error(f"Error in upload_image: {str(e)}")
         return jsonify({"error": "An unexpected error occurred"}), 500
 
-def upload_to_imgur(image, filename):
+def upload_to_imgur(file, filename):
     if not IMGUR_CLIENT_ID:
         logger.error("IMGUR_CLIENT_ID is not set")
         return jsonify({"error": "Server configuration error"}), 500
 
     headers = {"Authorization": f"Client-ID {IMGUR_CLIENT_ID}"}
-    files = {"image": (filename, image, image.content_type)}
+    files = {"image": (filename, file, file.content_type)}
 
     for attempt in range(MAX_RETRIES):
         try:
@@ -87,8 +97,7 @@ def upload_to_imgur(image, filename):
             response.raise_for_status()
             imgur_data = response.json()
             imgur_link = imgur_data["data"]["link"]
-            imgur_image_url = imgur_data["data"]["link"]
-            return jsonify({"success": True, "link": imgur_link, "image_url": imgur_image_url, "service": "imgur"})
+            return jsonify({"success": True, "link": imgur_link, "service": "imgur"})
         except requests.exceptions.RequestException as e:
             logger.error(f"Imgur upload attempt {attempt + 1} failed: {str(e)}")
             if response:
@@ -96,7 +105,7 @@ def upload_to_imgur(image, filename):
             if attempt < MAX_RETRIES - 1:
                 time.sleep(RETRY_DELAY * (2 ** attempt))  # Exponential backoff
             else:
-                return jsonify({"error": f"Failed to upload image to Imgur after {MAX_RETRIES} attempts"}), 500
+                return jsonify({"error": f"Failed to upload file to Imgur after {MAX_RETRIES} attempts"}), 500
 
 def upload_to_imgbb(image, filename):
     if not IMGBB_API_KEY:
