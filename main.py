@@ -28,10 +28,13 @@ class ProgressFileStorage(FileStorage):
         self.bytes_read = 0
         self.total_bytes = self.content_length
 
-    def read(self, size=-1):
-        chunk = super().read(size)
-        self.bytes_read += len(chunk)
-        return chunk
+    def __iter__(self):
+        while True:
+            chunk = self.read(8192)
+            if not chunk:
+                break
+            self.bytes_read += len(chunk)
+            yield chunk
 
     @property
     def progress(self):
@@ -45,26 +48,30 @@ def index():
 
 @app.route("/upload", methods=["POST"])
 def upload_image():
-    if "image" not in request.files:
-        return jsonify({"error": "No image file provided"}), 400
+    try:
+        if "image" not in request.files:
+            return jsonify({"error": "No image file provided"}), 400
 
-    image = ProgressFileStorage(request.files["image"])
-    if image.filename == "":
-        return jsonify({"error": "No image selected"}), 400
+        image = ProgressFileStorage(request.files["image"])
+        if image.filename == "":
+            return jsonify({"error": "No image selected"}), 400
 
-    service = request.form.get("service", "imgur")
+        service = request.form.get("service", "imgur")
 
-    if image:
-        filename = secure_filename(image.filename)
-        
-        if service == "imgur":
-            return upload_to_imgur(image, filename)
-        elif service == "imgbb":
-            return upload_to_imgbb(image, filename)
+        if image:
+            filename = secure_filename(image.filename)
+            
+            if service == "imgur":
+                return upload_to_imgur(image, filename)
+            elif service == "imgbb":
+                return upload_to_imgbb(image, filename)
+            else:
+                return jsonify({"error": "Invalid service selected"}), 400
         else:
-            return jsonify({"error": "Invalid service selected"}), 400
-    else:
-        return jsonify({"error": "Invalid image file"}), 400
+            return jsonify({"error": "Invalid image file"}), 400
+    except Exception as e:
+        logger.error(f"Error in upload_image: {str(e)}")
+        return jsonify({"error": "An unexpected error occurred"}), 500
 
 def upload_to_imgur(image, filename):
     if not IMGUR_CLIENT_ID:
