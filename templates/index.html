@@ -39,6 +39,10 @@
             <h2 class="text-lg font-semibold mb-2">Image Link:</h2>
             <a id="imageLink" href="#" target="_blank" class="text-blue-500 hover:underline break-all"></a>
         </div>
+        <div id="uploadedImage" class="mt-6 text-center hidden">
+            <h2 class="text-lg font-semibold mb-2">Uploaded Image:</h2>
+            <img id="displayedImage" src="" alt="Uploaded Image" class="max-w-full h-auto mx-auto">
+        </div>
         <div id="error" class="mt-6 text-center text-red-500 hidden"></div>
     </div>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>

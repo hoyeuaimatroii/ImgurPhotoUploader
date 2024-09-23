@@ -62,7 +62,8 @@ def upload_to_imgur(image, filename):
             response.raise_for_status()
             imgur_data = response.json()
             imgur_link = imgur_data["data"]["link"]
-            return jsonify({"success": True, "link": imgur_link, "service": "imgur"})
+            imgur_image_url = imgur_data["data"]["link"]
+            return jsonify({"success": True, "link": imgur_link, "image_url": imgur_image_url, "service": "imgur"})
         except requests.exceptions.RequestException as e:
             logger.error(f"Imgur upload attempt {attempt + 1} failed: {str(e)}")
             if response:
@@ -86,7 +87,8 @@ def upload_to_imgbb(image, filename):
             response.raise_for_status()
             imgbb_data = response.json()
             imgbb_link = imgbb_data["data"]["url"]
-            return jsonify({"success": True, "link": imgbb_link, "service": "imgbb"})
+            imgbb_image_url = imgbb_data["data"]["url"]
+            return jsonify({"success": True, "link": imgbb_link, "image_url": imgbb_image_url, "service": "imgbb"})
         except requests.exceptions.RequestException as e:
             logger.error(f"ImgBB upload attempt {attempt + 1} failed: {str(e)}")
             if response:

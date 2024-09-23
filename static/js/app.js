@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const imageInput = document.getElementById('imageInput');
     const resultDiv = document.getElementById('result');
     const imageLinkElement = document.getElementById('imageLink');
+    const uploadedImageDiv = document.getElementById('uploadedImage');
+    const displayedImage = document.getElementById('displayedImage');
     const errorDiv = document.getElementById('error');
     const dropZone = document.querySelector('label[for="imageInput"]');
 
@@ -19,16 +21,19 @@ document.addEventListener('DOMContentLoaded', () => {
         await uploadFile(file, selectedService);
     });
 
-    function showResult(link, service) {
+    function showResult(link, imageUrl, service) {
         resultDiv.classList.remove('hidden');
+        uploadedImageDiv.classList.remove('hidden');
         errorDiv.classList.add('hidden');
         imageLinkElement.href = link;
         imageLinkElement.textContent = `${service.charAt(0).toUpperCase() + service.slice(1)} Link: ${link}`;
+        displayedImage.src = imageUrl;
     }
 
     function showError(message) {
         errorDiv.classList.remove('hidden');
         resultDiv.classList.add('hidden');
+        uploadedImageDiv.classList.add('hidden');
         errorDiv.textContent = message;
     }
 
@@ -46,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (response.ok) {
-                showResult(data.link, data.service);
+                showResult(data.link, data.image_url, data.service);
             } else {
                 showError(data.error || 'An error occurred while uploading the image.');
             }
