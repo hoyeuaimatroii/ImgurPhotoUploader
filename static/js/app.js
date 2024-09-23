@@ -3,8 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const imageInput = document.getElementById('imageInput');
     const resultDiv = document.getElementById('result');
     const imageLinkElement = document.getElementById('imageLink');
-    const uploadedImageDiv = document.getElementById('uploadedImage');
-    const displayedImage = document.getElementById('displayedImage');
     const errorDiv = document.getElementById('error');
     const dropZone = document.querySelector('label[for="imageInput"]');
     const imagePreviewDiv = document.getElementById('imagePreview');
@@ -25,17 +23,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showResult(link, imageUrl, service) {
         resultDiv.classList.remove('hidden');
-        uploadedImageDiv.classList.remove('hidden');
         errorDiv.classList.add('hidden');
         imageLinkElement.href = link;
         imageLinkElement.textContent = `${service.charAt(0).toUpperCase() + service.slice(1)} Link: ${link}`;
-        displayedImage.src = imageUrl;
     }
 
     function showError(message) {
         errorDiv.classList.remove('hidden');
         resultDiv.classList.add('hidden');
-        uploadedImageDiv.classList.add('hidden');
         errorDiv.textContent = message;
     }
 
